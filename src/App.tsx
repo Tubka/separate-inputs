@@ -5,11 +5,11 @@ import { Input } from './Input/Input';
 
 
 function App() {
-  const [value, setValue] = useState('12 3');
+  const [value, setValue] = useState('2 23');
 
-  const handleChangeInputEach = (string) => {
+  const handleChangeInputEach = (string: string) => {
     setValue(string);
-  }
+  };
 
   return (
     <div className="App">
@@ -17,13 +17,14 @@ function App() {
         <img src={logo} className="App-logo" alt="logo" />
         <div>
           <Input 
-            className='input'
-            style={{width: '10px', marginLeft: '5px'}} 
-            value={value} 
-            onChange={handleChangeInputEach} 
-            count={5}
-            pattern={/^[0-9aA-zZ]/}
-          />
+              className='input'
+              style={{width: '10px', marginLeft: '5px'}} 
+              value={value} 
+              onChange={handleChangeInputEach} 
+              count={8}
+              pattern={/^[0-9]/}
+            />
+          
         </div>
         <p>
           Edit <code>src/App.js</code> and save to reload.
