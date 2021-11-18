@@ -1,5 +1,4 @@
-import React, { ReactType, useEffect, useState } from 'react';
-import { fileURLToPath } from 'url';
+import React, { useEffect, useState } from 'react';
 import useDynamicRefs from 'use-dynamic-refs';
 
 type FormatDate = 'dd-mm-yyyy' | 'yyyy-mm-dd';
@@ -22,14 +21,17 @@ enum TypeKey {
   Tab = 'Tab',
 }
 
-type TypeObjectKeys = {[key: number | string]: string}
+type TypeObjectKeys = {[key: number | string]: string};
 
 export const Input = ({count, value, style, onChange, className, pattern, formatDate}: Props) => {
   const [getRef, setRef] =  useDynamicRefs();
 
   const [emptyArray, setEmptyArray] = useState<Array<string | number>>([]);
-  const [valueEntire, setValueEntire] = useState<{[key: number]: string}>({});
+  const [valueObjectEach, setValueObjectEach] = useState<{[key: number]: string}>({});
   const [indexSignDate, setIndexSignDate] = useState<Array<number>>([]);
+
+  const listKeyToOmit = [TypeKey.Shift];
+
 
   const initObjFields = (): TypeObjectKeys => {
     const array = Array.from(Array(count).keys());
@@ -40,7 +42,7 @@ export const Input = ({count, value, style, onChange, className, pattern, format
     });
 
     setEmptyArray(array);
-    setValueEntire(fields);
+    setValueObjectEach(fields);
     return fields;
   }
 
@@ -62,7 +64,7 @@ export const Input = ({count, value, style, onChange, className, pattern, format
 
     Object.keys(obj).forEach((field, index) => {
       const sign = signs[index];
-      setValueEntire(prev => {
+      setValueObjectEach(prev => {
         return ({
           ...prev,
           [field]: sign && sign !== ' ' ? sign : '' ,
@@ -71,21 +73,24 @@ export const Input = ({count, value, style, onChange, className, pattern, format
     });
   },[value]);
 
-  const addLetter = (string: string, number?: number, sign?: string) => {
-    const signs: TypeObjectKeys = {}
+  const addSign = (string: string, number?: number, sign?: string) => {
+    const signs: TypeObjectKeys = {};
     const array = Array.from(Array(count).keys());
     array.forEach((_, index) => {
       if(index + 1 === number && sign !== undefined) {
         signs[index + 1] = sign;
         return;
-      }
-      signs[index + 1] = string.split('')[index] ?? ''
+      };
+      signs[index + 1] = string.split('')[index] ?? '';
     });
     let entireValue = ''
-    Object.keys(signs).forEach((field, index) => {
-        entireValue += signs[field as string];
+    Object.keys(signs).forEach((field) => {
+      const sign = signs[field as string];
+
+      if(sign === '') return entireValue += ' ';
+      entireValue += sign;
     });
-    onChange(entireValue.trim());
+    onChange(entireValue.trimEnd());
   }
 
   const onChangeOneInput = (ev: React.ChangeEvent<HTMLInputElement>, number: number) => {
@@ -95,7 +100,7 @@ export const Input = ({count, value, style, onChange, className, pattern, format
     const flag = reg.test(sign) || sign === '';
     
     if(!ref || !flag) return;
-    addLetter(value, number, sign)
+    addSign(value, number, sign);
   };
 
   const handleFocusAndSelect = (numberRef: number) => {
@@ -106,15 +111,15 @@ export const Input = ({count, value, style, onChange, className, pattern, format
   }
 
   const handleMouseKeyUp = (ev: React.KeyboardEvent<HTMLInputElement>, numberRef: number) => {
-    const listKeyToOmit = [TypeKey.Shift];
     const reg = new RegExp(pattern);
     const key = ev.key;
 
     if(listKeyToOmit.some(el => el === key)) return;
+
     if(key === TypeKey.ArrowLeft || key === TypeKey.Backspace) {
       return handleFocusAndSelect(numberRef - 1);
     };
-    
+
     if(key === TypeKey.ArrowRight) {
       return handleFocusAndSelect(numberRef + 1);
     };
@@ -140,7 +145,7 @@ export const Input = ({count, value, style, onChange, className, pattern, format
               style={style}
               type='text'
               maxLength={1}
-              value={valueEntire[number]}
+              value={valueObjectEach[number]}
               onKeyUp={(mouseEvent) => handleMouseKeyUp(mouseEvent, number)}
               onChange={(ev) => onChangeOneInput(ev, number)}
             />{separate && <span> {index} </span>}
